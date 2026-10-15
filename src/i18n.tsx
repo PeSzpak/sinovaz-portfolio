@@ -158,7 +158,7 @@ const pt = {
   ] as Job[],
   belt: {
     title: 'Arsenal',
-    intro: 'Cada bolso tem o que eu uso no dia a dia. Escolha um.',
+    intro: 'O que eu uso no dia a dia, separado por bolso.',
   },
   pouches: [
     { name: 'Linguagens', tools: ['TypeScript', 'JavaScript', 'Python', 'Java', 'SQL'] },
@@ -284,9 +284,9 @@ const en: Dict = {
       ],
     },
   ],
-  belt: { title: 'Arsenal', intro: 'Each pouch holds what I use day to day. Pick one.' },
+  belt: { title: 'Arsenal', intro: 'What I use day to day, sorted by pouch.' },
   pouches: [
-    pt.pouches[0],
+    { ...pt.pouches[0], name: 'Languages' },
     { ...pt.pouches[1], tools: ['Node.js', 'NestJS', 'Express', 'FastAPI', 'REST APIs', 'MCP', '.NET (basic)'] },
     { ...pt.pouches[2], name: 'Data and AI' },
     { ...pt.pouches[3], tools: ['React', 'Next.js', 'Tailwind CSS', 'Radix UI', 'Recharts', 'Flutter (basic)'] },

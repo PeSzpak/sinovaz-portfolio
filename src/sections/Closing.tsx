@@ -6,7 +6,7 @@ export function Record() {
   const { t } = useLang()
   const r = t.record
   return (
-    <section aria-labelledby="ficha" className="bg-blood py-20">
+    <section aria-labelledby="ficha" className="bg-blood pb-20 pt-10 md:pt-6">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <h2 id="ficha" className="display text-5xl font-black text-paper">
           {r.title}
@@ -60,14 +60,20 @@ export function Contact() {
   const link =
     'display text-xl font-bold text-paper underline decoration-signal decoration-2 underline-offset-4 hover:text-signal'
 
+  // Background starts on the Record section's maroon (no seam), glows behind the signal and ends on the footer's black.
   return (
     <section
       id="contato"
-      className="relative isolate scroll-mt-16 overflow-hidden py-28 sm:py-36"
-      style={{ background: 'radial-gradient(90% 90% at 75% 20%, #A8261A 0%, #8C1C13 30%, #3B0B0A 75%, #000 100%)' }}
+      className="relative isolate scroll-mt-16 overflow-hidden pb-28 pt-16 sm:pb-36 md:pt-36
+        bg-[radial-gradient(75%_17%_at_50%_19%,rgb(168_38_26/0.9),transparent),linear-gradient(180deg,#3B0B0A_0%,#2A0807_70%,#000_100%)]
+        md:bg-[radial-gradient(38%_44%_at_80%_52%,rgb(168_38_26/0.95),transparent),linear-gradient(180deg,#3B0B0A_0%,#2A0807_70%,#000_100%)]"
     >
       {/* the signal, already lit, resting on the clouds */}
-      <svg aria-hidden viewBox="0 0 400 260" className="absolute -right-16 -top-6 -z-10 w-[min(560px,75vw)] opacity-90">
+      <svg
+        aria-hidden
+        viewBox="0 0 400 260"
+        className="mx-auto mb-4 block w-64 md:absolute md:right-[4vw] md:top-1/2 md:-z-10 md:mb-0 md:w-[min(440px,38vw)] md:-translate-y-1/2"
+      >
         <defs>
           <radialGradient id="contact-disc">
             <stop offset="0" stopColor="#FFE680" />
