@@ -64,7 +64,8 @@ export function Hero() {
   return (
     <section id="top" aria-label={`${t.hero.first} ${t.hero.last}`}>
       <Gotham>
-        <div className="mx-auto flex h-full max-w-6xl flex-col justify-start px-4 pt-[16svh] sm:px-6 md:pt-[18svh]">
+        <div className="mx-auto max-w-6xl px-4 pt-[max(16svh,6rem)] sm:px-6 md:pt-[max(18svh,7rem)]">
+          <div data-hero-content className="w-fit max-w-full">
           <h1 className="display font-black uppercase text-paper text-[clamp(4.75rem,17vw,13.5rem)] drop-shadow-[0_6px_0_rgb(0_0_0/0.35)]">
             <span className="block">{t.hero.first}</span>
             <span className="block pl-[0.35em]">{t.hero.last}</span>
@@ -97,6 +98,7 @@ export function Hero() {
             >
               {t.hero.cv}
             </a>
+          </div>
           </div>
         </div>
         <p className="pointer-events-none absolute right-6 top-20 hidden text-sm italic text-paper/50 [@media(pointer:fine)]:md:block">

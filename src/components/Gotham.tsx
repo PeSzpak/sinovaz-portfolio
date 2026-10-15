@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useSpring, useTransform } from 'motion/react'
 import { BatShape } from './BatSymbol'
 
@@ -68,6 +68,13 @@ function blockPath(b: Block) {
   return d
 }
 
+// Highest point of a block, counting setbacks and spire, in skyline units.
+function blockHeight(b: Block) {
+  let rise = 0
+  for (let i = 0; i < b.tiers; i++) rise += 14 + i * 6
+  return b.h + rise + (b.spire ? 46 : 0)
+}
+
 // The lamp tower: a deco tower with a platform for the signal.
 const TOWER =
   `M1160 ${SKY_H} L1160 ${SKY_H - 250} L1172 ${SKY_H - 250} L1172 ${SKY_H - 280} L1186 ${SKY_H - 280} L1186 ${SKY_H - 300} ` +
@@ -92,10 +99,33 @@ export function Gotham({ children }: { children: ReactNode }) {
   const far = useMemo(() => buildLayer(7, 180, 400, 0, undefined), [])
   const near = useMemo(() => buildLayer(23, 70, 250, 0.05, [1150, 1280]), [])
 
-  // cover the width, but never let the skyline drop under ~42% of the hero height
-  const scale = Math.max(w / SKY_W, (h * 0.42) / SKY_H)
+  // scale by width only, so the skyline height never depends on the text it must clear
+  const scale = Math.max(w / SKY_W, 0.5)
   const offX = (w - SKY_W * scale) / 2
   const offY = h - SKY_H * scale
+
+  // Grow the hero so the near buildings under the text column end below the text.
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [minH, setMinH] = useState(0)
+  useLayoutEffect(() => {
+    const el = contentRef.current?.querySelector<HTMLElement>('[data-hero-content]')
+    const host = ref.current
+    if (!el || !host) return
+    const measure = () => {
+      const box = host.getBoundingClientRect()
+      const r = el.getBoundingClientRect()
+      const uL = (r.left - box.left - offX) / scale
+      const uR = (r.right - box.left - offX) / scale
+      let tallest = uR > 1160 && uL < 1270 ? 318 : 0
+      for (const b of near) if (b.x < uR && b.x + b.w > uL) tallest = Math.max(tallest, blockHeight(b))
+      setMinH(Math.ceil(r.bottom - box.top + tallest * scale + 32))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [w, scale, offX, near, ref])
+
   const sky = `translate(${offX} ${offY}) scale(${scale})`
   const sx = offX + LAMP.x * scale
   const sy = offY + LAMP.y * scale
@@ -160,8 +190,8 @@ export function Gotham({ children }: { children: ReactNode }) {
       ref={ref}
       onPointerMove={onMove}
       onPointerLeave={() => (hovering.current = false)}
-      className="relative isolate min-h-[640px] h-[100svh] overflow-hidden"
-      style={{ background: 'radial-gradient(120% 80% at 60% 10%, #A8261A 0%, #8C1C13 35%, #3B0B0A 80%)' }}
+      className="relative isolate min-h-[100svh] overflow-hidden"
+      style={{ minHeight: minH ? `max(100svh, ${minH}px)` : undefined, background: 'radial-gradient(120% 80% at 60% 10%, #A8261A 0%, #8C1C13 35%, #3B0B0A 80%)' }}
     >
       <svg className="absolute inset-0 -z-10 h-full w-full" width={w} height={h} aria-hidden>
         <defs>
@@ -205,7 +235,9 @@ export function Gotham({ children }: { children: ReactNode }) {
         </motion.g>
       </svg>
 
-      <div className="relative z-10 h-full">{children}</div>
+      <div ref={contentRef} className="relative z-10">
+        {children}
+      </div>
 
       {/* near skyline sits in front of the text */}
       <svg className="pointer-events-none absolute inset-0 z-20 h-full w-full" width={w} height={h} aria-hidden>
@@ -215,6 +247,8 @@ export function Gotham({ children }: { children: ReactNode }) {
               <path key={i} d={blockPath(b)} />
             ))}
             <path d={TOWER} />
+            {/* street level, closes gaps between buildings */}
+            <rect x={-60} y={SKY_H - 90} width={SKY_W + 120} height={400} />
             {/* the lamp housing */}
             <rect x={LAMP.x - 16} y={LAMP.y - 2} width={32} height={20} rx={3} />
           </g>
