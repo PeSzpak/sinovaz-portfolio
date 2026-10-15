@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sky: #8C1C13;
+  --color-blood: #3B0B0A;
+  --color-ink: #000000;
+  --color-signal: #F2C230;
+  --color-signal-deep: #B8871A;
+  --color-paper: #E9E1CC;
+  --color-paper-shade: #D6CBB0;
+  --color-kevlar: #5A5F66;
+  --color-fog: #A39E92;
+
+  --font-display: "Big Shoulders", "Arial Narrow", sans-serif;
+  --font-serif: "Newsreader", Georgia, serif;
+}
+
+html {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  line-height: 1.65;
+  font-optical-sizing: auto;
+}
+
+::selection {
+  background: var(--color-signal);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 3px;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 72;
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+}
+
+/* paper texture for case files: two soft stains and a fold line */
+.paper {
+  background-color: var(--color-paper);
+  background-image:
+    radial-gradient(ellipse 40% 30% at 85% 15%, rgb(140 110 60 / 0.10), transparent 70%),
+    radial-gradient(ellipse 30% 40% at 10% 90%, rgb(120 90 40 / 0.08), transparent 70%),
+    linear-gradient(90deg, transparent 49.6%, rgb(0 0 0 / 0.045) 50%, transparent 50.4%);
+  color: var(--color-ink);
+}
+
+.stamp {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--color-sky);
+  border: 3px solid currentColor;
+  border-radius: 4px;
+  padding: 0.1em 0.5em 0.05em;
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+}
+
+.evidence {
+  filter: grayscale(1) sepia(0.35) contrast(1.1);
+  transition: filter 0.5s ease;
+}
+.evidence-wrap:hover .evidence,
+.evidence-wrap:focus-within .evidence {
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
