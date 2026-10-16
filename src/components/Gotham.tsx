@@ -75,6 +75,27 @@ function blockHeight(b: Block) {
   return b.h + rise + (b.spire ? 46 : 0)
 }
 
+// Trim a block down to `cap` units: spire goes first, then setbacks, then the shaft itself.
+function fitBlock(b: Block, cap: number): Block {
+  if (blockHeight(b) <= cap) return b
+  let fit: Block = { ...b, spire: false }
+  while (fit.tiers > 0 && blockHeight(fit) > cap) fit = { ...fit, tiers: fit.tiers - 1 }
+  if (blockHeight(fit) > cap) fit = { ...fit, h: Math.max(0, cap) }
+  const top = SKY_H - fit.h
+  return { ...fit, windows: b.windows.filter(([, y]) => y >= top + 12) }
+}
+
+// Text boxes in host pixels; the skyline is fitted around them.
+type Span = { l: number; r: number; b: number }
+const GAP = 24
+const PAD_X = 12
+// Street level plus a sliver of rooftops, always visible under the text.
+const MIN_SKY = 140
+const TOWER_X: [number, number] = [1160, 1270]
+const TOWER_H = 322
+// Skyline units that should fill the free space under the text on narrow screens.
+const ROOM_UNITS = 330
+
 // The lamp tower: a deco tower with a platform for the signal.
 const TOWER =
   `M1160 ${SKY_H} L1160 ${SKY_H - 250} L1172 ${SKY_H - 250} L1172 ${SKY_H - 280} L1186 ${SKY_H - 280} L1186 ${SKY_H - 300} ` +
@@ -99,32 +120,68 @@ export function Gotham({ children }: { children: ReactNode }) {
   const far = useMemo(() => buildLayer(7, 180, 400, 0, undefined), [])
   const near = useMemo(() => buildLayer(23, 70, 250, 0.05, [1150, 1280]), [])
 
-  // scale by width only, so the skyline height never depends on the text it must clear
-  const scale = Math.max(w / SKY_W, 0.5)
-  const offX = (w - SKY_W * scale) / 2
-  const offY = h - SKY_H * scale
-
-  // Grow the hero so the near buildings under the text column end below the text.
+  // Measure the actual glyph lines and buttons, so buildings can rise right up to them.
   const contentRef = useRef<HTMLDivElement>(null)
-  const [minH, setMinH] = useState(0)
+  const [spans, setSpans] = useState<Span[]>([])
+  const [vh, setVh] = useState(800)
+  useEffect(() => {
+    const on = () => setVh(window.innerHeight)
+    on()
+    window.addEventListener('resize', on)
+    return () => window.removeEventListener('resize', on)
+  }, [])
+
+  // Cover the width, and on narrow screens grow until the city fills the room left under the text.
+  const textBottom = spans.reduce((m, s) => Math.max(m, s.b), 0)
+  const room = spans.length ? vh - textBottom - GAP : 0
+  const scale = Math.max(w / SKY_W, Math.min(1.2, room / ROOM_UNITS), 0.5)
+  // centred, but never so far left that the signal tower leaves the screen
+  const offX = Math.min((w - SKY_W * scale) / 2, w * 0.82 - LAMP.x * scale)
+  const offY = h - SKY_H * scale
   useLayoutEffect(() => {
     const el = contentRef.current?.querySelector<HTMLElement>('[data-hero-content]')
     const host = ref.current
     if (!el || !host) return
     const measure = () => {
       const box = host.getBoundingClientRect()
-      const r = el.getBoundingClientRect()
-      const uL = (r.left - box.left - offX) / scale
-      const uR = (r.right - box.left - offX) / scale
-      let tallest = uR > 1160 && uL < 1270 ? 318 : 0
-      for (const b of near) if (b.x < uR && b.x + b.w > uL) tallest = Math.max(tallest, blockHeight(b))
-      setMinH(Math.ceil(r.bottom - box.top + tallest * scale + 32))
+      const rects: DOMRect[] = Array.from(el.querySelectorAll('a, button'), (a) => a.getBoundingClientRect())
+      const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+      const range = document.createRange()
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        range.selectNodeContents(n)
+        rects.push(...Array.from(range.getClientRects()))
+      }
+      setSpans(
+        rects
+          .filter((r) => r.width > 0 && r.height > 0)
+          .map((r) => ({ l: r.left - box.left - PAD_X, r: r.right - box.left + PAD_X, b: r.bottom - box.top })),
+      )
     }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(el)
     return () => ro.disconnect()
-  }, [w, scale, offX, near, ref])
+  }, [w, ref])
+
+  const toUnits = (s: Span) => [(s.l - offX) / scale, (s.r - offX) / scale] as const
+
+  // The hero keeps a full screen; it only grows when the text leaves no room for the street or the tower.
+  let minH = 0
+  for (const s of spans) {
+    const [uL, uR] = toUnits(s)
+    const sky = uR > TOWER_X[0] && uL < TOWER_X[1] ? TOWER_H : MIN_SKY
+    minH = Math.max(minH, Math.ceil(s.b + GAP + sky * scale))
+  }
+
+  // Near buildings under a line of text stop just below it.
+  const fitted = near.map((b) => {
+    let cap = Infinity
+    for (const s of spans) {
+      const [uL, uR] = toUnits(s)
+      if (b.x < uR && b.x + b.w > uL) cap = Math.min(cap, (h - s.b - GAP) / scale)
+    }
+    return fitBlock(b, cap)
+  })
 
   const sky = `translate(${offX} ${offY}) scale(${scale})`
   const sx = offX + LAMP.x * scale
@@ -239,11 +296,11 @@ export function Gotham({ children }: { children: ReactNode }) {
         {children}
       </div>
 
-      {/* near skyline sits in front of the text */}
+      {/* near skyline sits in front of the text, fitted so it never covers it */}
       <svg className="pointer-events-none absolute inset-0 z-20 h-full w-full" width={w} height={h} aria-hidden>
         <g transform={sky}>
           <g fill="#000">
-            {near.map((b, i) => (
+            {fitted.map((b, i) => (
               <path key={i} d={blockPath(b)} />
             ))}
             <path d={TOWER} />
@@ -253,7 +310,7 @@ export function Gotham({ children }: { children: ReactNode }) {
             <rect x={LAMP.x - 16} y={LAMP.y - 2} width={32} height={20} rx={3} />
           </g>
           <g fill="#F2C230" opacity="0.75">
-            {near.flatMap((b, i) => b.windows.map(([x, y], j) => <rect key={`${i}-${j}`} x={x} y={y} width={4} height={6} />))}
+            {fitted.flatMap((b, i) => b.windows.map(([x, y], j) => <rect key={`${i}-${j}`} x={x} y={y} width={4} height={6} />))}
           </g>
           <motion.rect
             x={LAMP.x - 12}

@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useLang, type Pouch } from '../i18n'
 
@@ -31,23 +31,74 @@ function PouchFace({ name, active }: { name: string; active: boolean }) {
   )
 }
 
-// Phones: the belt hangs vertically and every pouch shows its contents. Nothing to discover.
-function VerticalBelt({ pouches }: { pouches: Pouch[] }) {
+// Phones: the pouches hang open from a strap and slide along it; the next one peeks in from the edge.
+function SlidingBelt({ pouches, label }: { pouches: Pouch[]; label: string }) {
+  const track = useRef<HTMLUListElement>(null)
+  const [at, setAt] = useState(0)
+
+  const onScroll = () => {
+    const el = track.current
+    if (!el || el.children.length < 2) return
+    const step = (el.children[1] as HTMLElement).offsetLeft - (el.children[0] as HTMLElement).offsetLeft
+    setAt(Math.min(pouches.length - 1, Math.max(0, Math.round(el.scrollLeft / step))))
+  }
+
+  const go = (i: number) => {
+    const el = track.current
+    const item = el?.children[i] as HTMLElement | undefined
+    if (!el || !item) return
+    el.scrollTo({ left: item.offsetLeft - (el.children[0] as HTMLElement).offsetLeft, behavior: 'smooth' })
+  }
+
   return (
-    <div className="relative mt-12 px-4 md:hidden">
-      <div aria-hidden className="absolute bottom-0 left-4 top-0 w-7 bg-signal-deep" style={stitches('180deg')} />
-      <ul className="relative space-y-7">
+    <div className="relative mt-12 md:hidden">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-7 bg-signal-deep" style={stitches('90deg')} />
+      {/* buckle */}
+      <div
+        aria-hidden
+        className="absolute -top-2 left-3 z-20 h-11 w-14 rounded-md border-4 border-signal bg-ink shadow-[4px_6px_14px_-6px_rgb(0_0_0/0.9)]"
+      >
+        <span className="absolute inset-y-1 left-1/2 w-1.5 -translate-x-1/2 rounded bg-signal" />
+      </div>
+
+      <ul
+        ref={track}
+        onScroll={onScroll}
+        aria-label={label}
+        tabIndex={0}
+        className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-pl-20 pb-6 pl-20 pr-[22%] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {pouches.map((p) => (
-          <li key={p.name} className="flex items-start">
-            {/* pouch clipped to the strap */}
-            <span className="relative z-10 ml-3.5 w-[7.5rem] shrink-0 rounded-r-xl border-y-2 border-r-2 border-signal-deep bg-signal py-2 pl-3 pr-4 shadow-[6px_8px_18px_-8px_rgb(0_0_0/0.8)]">
-              <span aria-hidden className="absolute inset-y-1 left-0 w-1.5 rounded-r bg-[#B8871A]" />
-              <span className="display block text-lg font-extrabold leading-none text-ink">{p.name}</span>
-            </span>
-            <p className="ml-4 pt-0.5 font-serif text-lg leading-snug text-paper">{p.tools.join(', ')}</p>
+          <li key={p.name} className="flex w-[72%] shrink-0 snap-start flex-col">
+            {/* belt loop wrapped around the strap */}
+            <span aria-hidden className="relative z-10 mx-auto -mb-1 block h-9 w-12 rounded-sm border-2 border-black/30 bg-[#B8871A]" />
+            <div className="relative flex-1 rounded-b-2xl border-x-2 border-b-2 border-signal-deep bg-signal px-4 pb-5 pt-10 text-ink shadow-[0_16px_30px_-10px_rgb(242_194_48/0.4)]">
+              <span aria-hidden className="absolute inset-x-2 top-0 h-7 rounded-b-xl border-b-2 border-black/25 bg-[#FFD75A]" />
+              <h3 className="display relative text-2xl font-extrabold leading-none">{p.name}</h3>
+              <ul className="mt-3 space-y-1 font-serif text-lg leading-snug">
+                {p.tools.map((tool) => (
+                  <li key={tool}>{tool}</li>
+                ))}
+              </ul>
+            </div>
           </li>
         ))}
       </ul>
+
+      <div className="flex justify-center gap-1">
+        {pouches.map((p, i) => (
+          <button
+            key={p.name}
+            type="button"
+            onClick={() => go(i)}
+            aria-label={p.name}
+            aria-current={i === at}
+            className="grid h-8 w-8 place-items-center"
+          >
+            <span className={`block h-2.5 rounded-full transition-all ${i === at ? 'w-6 bg-signal' : 'w-2.5 bg-paper/35'}`} />
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
@@ -132,7 +183,7 @@ export function Belt() {
           <p className="max-w-sm pb-3 text-lg text-fog">{t.belt.intro}</p>
         </div>
       </div>
-      <VerticalBelt pouches={t.pouches} />
+      <SlidingBelt pouches={t.pouches} label={t.belt.title} />
       <HorizontalBelt pouches={t.pouches} label={t.belt.title} />
     </section>
   )
