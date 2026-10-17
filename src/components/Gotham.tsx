@@ -123,12 +123,15 @@ export function Gotham({ children }: { children: ReactNode }) {
   // Measure the actual glyph lines and buttons, so buildings can rise right up to them.
   const contentRef = useRef<HTMLDivElement>(null)
   const [spans, setSpans] = useState<Span[]>([])
+  // 100svh, not innerHeight: it stays put while the mobile address bar slides in and out on scroll.
+  const probeRef = useRef<HTMLDivElement>(null)
   const [vh, setVh] = useState(800)
   useEffect(() => {
-    const on = () => setVh(window.innerHeight)
-    on()
-    window.addEventListener('resize', on)
-    return () => window.removeEventListener('resize', on)
+    const el = probeRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setVh(e.contentRect.height))
+    ro.observe(el)
+    return () => ro.disconnect()
   }, [])
 
   // Cover the width, and on narrow screens grow until the city fills the room left under the text.
@@ -250,6 +253,7 @@ export function Gotham({ children }: { children: ReactNode }) {
       className="relative isolate min-h-[100svh] overflow-hidden"
       style={{ minHeight: minH ? `max(100svh, ${minH}px)` : undefined, background: 'radial-gradient(120% 80% at 60% 10%, #A8261A 0%, #8C1C13 35%, #3B0B0A 80%)' }}
     >
+      <div ref={probeRef} aria-hidden className="pointer-events-none invisible absolute inset-x-0 top-0 h-svh" />
       <svg className="absolute inset-0 -z-10 h-full w-full" width={w} height={h} aria-hidden>
         <defs>
           <filter id="cloud-blur" x="-20%" y="-50%" width="140%" height="200%">
