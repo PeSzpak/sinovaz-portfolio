@@ -44,13 +44,19 @@ function Evidence({ file }: { file: CaseFile }) {
   )
 }
 
-function Featured({ file }: { file: CaseFile }) {
+function Featured({ file, flip }: { file: CaseFile; flip: boolean }) {
   const { t } = useLang()
   return (
-    <article className="paper relative grid gap-8 rounded-[3px] p-6 shadow-[0_30px_60px_-20px_rgb(0_0_0/0.9)] sm:p-10 md:grid-cols-[1.05fr_1fr] md:gap-12">
-      <div className="md:pt-4 md:-rotate-[1.5deg]">
-        <Evidence file={file} />
-      </div>
+    <article
+      className={`paper relative grid gap-8 rounded-[3px] p-6 shadow-[0_30px_60px_-20px_rgb(0_0_0/0.9)] sm:p-10 md:gap-12 ${
+        !file.shot ? '' : flip ? 'md:grid-cols-[1fr_0.55fr]' : 'md:grid-cols-[1.05fr_1fr]'
+      }`}
+    >
+      {file.shot && (
+        <div className={`md:pt-4 ${flip ? 'md:order-2 md:rotate-[1.5deg]' : 'md:-rotate-[1.5deg]'}`}>
+          <Evidence file={file} />
+        </div>
+      )}
       <div>
         <div className="flex items-start justify-between gap-4">
           <h3 className="display text-[clamp(3rem,7vw,5rem)] font-black">{file.name}</h3>
@@ -114,8 +120,8 @@ function Smaller({ file, i }: { file: CaseFile; i: number }) {
 
 export function Cases() {
   const { t } = useLang()
-  const first = t.files.find((f) => f.tier === 'featured')!
-  const rest = t.files.filter((f) => f !== first)
+  const featured = t.files.filter((f) => f.tier === 'featured')
+  const rest = t.files.filter((f) => f.tier === 'smaller')
   return (
     <section id="casos" className="scroll-mt-16 bg-ink py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -124,7 +130,11 @@ export function Cases() {
           <p className="max-w-md pb-3 text-lg text-fog">{t.cases.intro}</p>
         </div>
 
-        <Featured file={first} />
+        <div className="space-y-14">
+          {featured.map((f, i) => (
+            <Featured key={f.id} file={f} flip={i % 2 === 1} />
+          ))}
+        </div>
 
         <div className="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
           {rest.map((f, i) => (
@@ -146,7 +156,7 @@ export function Cases() {
                   rel="noreferrer"
                   className="group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"
                 >
-                  <span className="display text-2xl font-bold text-paper transition-colors group-hover:text-signal">
+                  <span className="display shrink-0 text-2xl font-bold text-paper transition-colors group-hover:text-signal">
                     {a.name}
                   </span>
                   <span className="text-base text-fog sm:text-right">{a.note}</span>
