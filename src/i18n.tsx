@@ -68,6 +68,8 @@ export type Job = {
   stack?: string[]
 }
 
+export type Method = { title: string; body: string[]; link?: { label: string; href: string } }
+
 export type Pouch = { name: string; tools: string[] }
 
 export type ArchiveEntry = { name: string; note: string; href: string }
@@ -124,7 +126,7 @@ const ptText: Record<CaseId, CaseText> = {
 
 const pt = {
   ...shared,
-  nav: { cases: 'Casos', path: 'Trajetória', belt: 'Arsenal', contact: 'Contato' },
+  nav: { cases: 'Casos', path: 'Trajetória', method: 'Método', belt: 'Arsenal', contact: 'Contato' },
   hero: {
     first: 'Pedro',
     last: 'Szpak',
@@ -201,6 +203,35 @@ const pt = {
       ],
     },
   ] as Job[],
+  method: {
+    title: 'Modus operandi',
+    intro: 'Como eu trabalho, do servidor MCP ao agente que escreve código comigo.',
+    lights: ['Pensando…', 'Te esperando', 'Pronto!'],
+    items: [
+      {
+        title: 'Servidores MCP',
+        body: [
+          'MCP é o protocolo que deixa um assistente de IA chamar ferramentas e ler dados de outro sistema. Na Recall Consultoria eu construo servidores MCP em TypeScript que dão ao assistente interno acesso seguro ao CRM e aos pareceres, com cada usuário vendo só os próprios casos.',
+          'Nos meus projetos pessoais a regra é a mesma. A permissão mora no banco, com Row Level Security, e a interface só mostra o que o banco devolve.',
+        ],
+      },
+      {
+        title: 'Especificação antes do código',
+        body: [
+          'No TWS Score, na Grão Raro e na LP Corte Real, a especificação e o plano estão escritos no repositório, ao lado do código.',
+          'As regras que importam têm teste contra o banco real. É o caso da nota surpresa do TWS Score e do estoque da Grão Raro.',
+        ],
+      },
+      {
+        title: 'Agentes de código',
+        body: [
+          'Uso o Claude Code no dia a dia. Mantenho um script que instala meus plugins, skills e ferramentas com um comando em macOS, Linux, WSL e Windows.',
+          'Também fiz o Semáforo, uma janelinha que mostra se o agente está pensando, esperando por mim ou pronto. Funciona com Claude Code, Codex e Gemini CLI.',
+        ],
+        link: { label: 'Semáforo no GitHub', href: 'https://github.com/PeSzpak/claude-semaforo' },
+      },
+    ] as Method[],
+  },
   belt: {
     title: 'Arsenal',
     intro: 'O que eu uso no dia a dia, separado por bolso.',
@@ -281,7 +312,7 @@ const enText: Record<CaseId, CaseText> = {
 
 const en: Dict = {
   ...pt,
-  nav: { cases: 'Cases', path: 'Path', belt: 'Arsenal', contact: 'Contact' },
+  nav: { cases: 'Cases', path: 'Path', method: 'Method', belt: 'Arsenal', contact: 'Contact' },
   hero: {
     first: 'Pedro',
     last: 'Szpak',
@@ -351,6 +382,35 @@ const en: Dict = {
       ],
     },
   ],
+  method: {
+    title: 'Modus operandi',
+    intro: 'How I work, from the MCP server to the agent that writes code with me.',
+    lights: ['Thinking…', 'Waiting for you', 'Done!'],
+    items: [
+      {
+        title: 'MCP servers',
+        body: [
+          'MCP is the protocol that lets an AI assistant call tools and read data from another system. At Recall Consultoria I build TypeScript MCP servers that give the internal assistant safe access to the CRM and legal reports, scoped so each user only sees their own cases.',
+          'My personal projects follow the same rule. Permission lives in the database, with Row Level Security, and the interface only shows what the database returns.',
+        ],
+      },
+      {
+        title: 'Spec before code',
+        body: [
+          'In TWS Score, Grão Raro and LP Corte Real, the spec and the plan are written in the repository, next to the code.',
+          'The rules that matter have tests against the real database. That covers the surprise score in TWS Score and the stock in Grão Raro.',
+        ],
+      },
+      {
+        title: 'Coding agents',
+        body: [
+          'I use Claude Code day to day. I keep a script that installs my plugins, skills and tools with one command on macOS, Linux, WSL and Windows.',
+          'I also built Semáforo, a small window that shows whether the agent is thinking, waiting for me or done. It works with Claude Code, Codex and Gemini CLI.',
+        ],
+        link: { label: 'Semáforo on GitHub', href: 'https://github.com/PeSzpak/claude-semaforo' },
+      },
+    ] as Method[],
+  },
   belt: { title: 'Arsenal', intro: 'What I use day to day, sorted by pouch.' },
   pouches: [
     { ...pt.pouches[0], name: 'Languages' },

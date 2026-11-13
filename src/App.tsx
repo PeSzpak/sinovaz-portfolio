@@ -2,6 +2,7 @@ import Noise from './components/reactbits/Noise'
 import { Hero, Nav } from './sections/Top'
 import { Cases } from './sections/Cases'
 import { Path } from './sections/Path'
+import { Method } from './sections/Method'
 import { Belt } from './sections/Belt'
 import { Contact, Footer, Record } from './sections/Closing'
 
@@ -13,6 +14,7 @@ export default function App() {
         <Hero />
         <Cases />
         <Path />
+        <Method />
         <Belt />
         <Record />
         <Contact />

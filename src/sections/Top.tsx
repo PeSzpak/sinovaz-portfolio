@@ -17,6 +17,7 @@ export function Nav() {
   const links: [string, string][] = [
     ['#casos', t.nav.cases],
     ['#trajetoria', t.nav.path],
+    ['#metodo', t.nav.method],
     ['#arsenal', t.nav.belt],
     ['#contato', t.nav.contact],
   ]
