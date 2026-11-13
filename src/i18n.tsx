@@ -1,6 +1,14 @@
+import mediaJson from './media.json'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
 export type Lang = 'pt' | 'en'
+
+export type ThemeId = 'default' | 'light' | 'dark' | 'batman' | 'kitty'
+export type Media = {
+  frame: 'wide' | 'tall'
+  themes: [ThemeId] | [ThemeId, ThemeId]
+  video?: true
+}
 
 const caseIds = ['strackz', 'tws', 'sgymz', 'face', 'graoraro'] as const
 export type CaseId = (typeof caseIds)[number]
@@ -12,6 +20,7 @@ type CaseBase = {
   url?: string
   repo?: string
   shot?: string
+  media?: Media
   stack: string[]
 }
 type CaseText = { summary: string; points: string[] }
@@ -56,8 +65,11 @@ const caseBase: Record<CaseId, CaseBase> = {
   },
 }
 
+// src/media.json is the single declaration of which files exist; scripts/media-check.mjs proves them.
+const media = mediaJson as unknown as Partial<Record<CaseId, Media>>
+
 const buildFiles = (text: Record<CaseId, CaseText>): CaseFile[] =>
-  caseIds.map((id) => ({ id, ...caseBase[id], ...text[id] }))
+  caseIds.map((id) => ({ id, ...caseBase[id], media: media[id], ...text[id] }))
 
 export type Job = {
   when: string
@@ -141,6 +153,8 @@ const pt = {
     intro: 'Projetos que estão no ar ou em uso de verdade. Cada um resolveu um problema real de alguém, quase sempre meu.',
     status: { live: 'No ar', personal: 'Em uso', local: 'Roda local' },
     open: 'Abrir o site',
+    demo: 'Demo',
+    views: { default: 'Tela', light: 'Claro', dark: 'Escuro', batman: 'Batman', kitty: 'Hello Kitty' } as Record<ThemeId, string>,
     code: 'Ver código',
     stackLabel: 'Feito com',
     archiveTitle: 'Arquivo',
@@ -327,6 +341,8 @@ const en: Dict = {
     intro: 'Projects that are live or in real use. Each one solved a real problem for someone, usually me.',
     status: { live: 'Live', personal: 'In use', local: 'Runs locally' },
     open: 'Open the site',
+    demo: 'Demo',
+    views: { default: 'Screen', light: 'Light', dark: 'Dark', batman: 'Batman', kitty: 'Hello Kitty' } as Record<ThemeId, string>,
     code: 'View code',
     stackLabel: 'Built with',
     archiveTitle: 'Archive',

@@ -1,4 +1,7 @@
 import { useLang, type CaseFile } from '../i18n'
+import { Evidence } from '../components/Evidence'
+
+const hasPhoto = (f: CaseFile) => Boolean(f.media || f.shot)
 
 function Links({ file, dark = true }: { file: CaseFile; dark?: boolean }) {
   const { t } = useLang()
@@ -25,34 +28,15 @@ function Stamp({ status, className = '' }: { status: CaseFile['status']; classNa
   return <span className={`stamp inline-block text-xl ${className}`}>{t.cases.status[status]}</span>
 }
 
-function Evidence({ file }: { file: CaseFile }) {
-  if (!file.shot) return null
-  return (
-    <a
-      href={file.url}
-      target="_blank"
-      rel="noreferrer"
-      className="evidence-wrap relative block bg-white p-2 pb-8 shadow-[0_14px_30px_-12px_rgb(0_0_0/0.6)]"
-    >
-      <span
-        aria-hidden
-        className="absolute -top-3 left-1/2 h-6 w-24 -translate-x-1/2 -rotate-3 bg-paper-shade/80 shadow-sm"
-      />
-      <img src={file.shot} alt={`${file.name}`} loading="lazy" className="evidence aspect-[16/10] w-full object-cover object-top" />
-      <span className="absolute bottom-1.5 left-3 font-serif text-sm italic text-ink/70">{file.url?.replace('https://', '')}</span>
-    </a>
-  )
-}
-
 function Featured({ file, flip }: { file: CaseFile; flip: boolean }) {
   const { t } = useLang()
   return (
     <article
       className={`paper relative grid gap-8 rounded-[3px] p-6 shadow-[0_30px_60px_-20px_rgb(0_0_0/0.9)] sm:p-10 md:gap-12 ${
-        !file.shot ? '' : flip ? 'md:grid-cols-[1fr_0.55fr]' : 'md:grid-cols-[1.05fr_1fr]'
+        !hasPhoto(file) ? '' : flip ? 'md:grid-cols-[1fr_0.55fr]' : 'md:grid-cols-[1.05fr_1fr]'
       }`}
     >
-      {file.shot && (
+      {hasPhoto(file) && (
         <div className={`md:pt-4 ${flip ? 'md:order-2 md:rotate-[1.5deg]' : 'md:-rotate-[1.5deg]'}`}>
           <Evidence file={file} />
         </div>
@@ -89,7 +73,7 @@ function Smaller({ file, i }: { file: CaseFile; i: number }) {
     <article
       className={`paper relative flex flex-col rounded-[3px] p-6 shadow-[0_24px_40px_-18px_rgb(0_0_0/0.9)] ${tilts[i % tilts.length]}`}
     >
-      {file.shot && (
+      {hasPhoto(file) && (
         <div className="mb-6">
           <Evidence file={file} />
         </div>
