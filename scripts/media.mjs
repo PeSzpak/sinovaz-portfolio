@@ -66,9 +66,16 @@ if (both || flags.includes('--stills')) {
 if (both || flags.includes('--video')) {
   const theme = recipe.themes[0]
   const size = { width: viewport.width * scale, height: viewport.height * scale }
-  const ctx = await browser.newContext(ctxOpts(theme, { recordVideo: { dir: tmp, size } }))
+  // Login happens in a throwaway context so the recording starts on the first story beat.
+  let storageState
+  if (recipe.prepare) {
+    const prep = await browser.newContext(ctxOpts(theme))
+    await recipe.prepare(await prep.newPage(), theme)
+    storageState = await prep.storageState()
+    await prep.close()
+  }
+  const ctx = await browser.newContext(ctxOpts(theme, { recordVideo: { dir: tmp, size }, storageState }))
   const page = await ctx.newPage()
-  await recipe.prepare?.(page, theme)
   await recipe.story(page, theme)
   const raw = await page.video().path()
   await ctx.close()

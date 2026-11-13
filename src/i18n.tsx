@@ -33,7 +33,7 @@ const caseBase: Record<CaseId, CaseBase> = {
     status: 'live',
     url: 'https://strackz.sinovaz.com',
     shot: '/shots/strackz.jpg',
-    stack: ['Next.js', 'TypeScript', 'Supabase', 'PostgreSQL', 'Pluggy', 'Tailwind', 'Radix UI', 'Recharts'],
+    stack: ['Next.js', 'TypeScript', 'Supabase', 'PostgreSQL', 'Tailwind', 'Radix UI', 'Recharts'],
   },
   tws: {
     name: 'TWS Score',
@@ -99,7 +99,7 @@ const ptText: Record<CaseId, CaseText> = {
     points: [
       'Transações, contas recorrentes e parcelamentos com status que se atualizam sozinhos.',
       'Login com Supabase Auth e dados isolados por usuário com Row Level Security no PostgreSQL.',
-      'Importação opcional do banco pela Pluggy. O que chega vai para uma caixa de revisão e só entra no saldo depois de confirmado.',
+      'Painéis de orçamento por categoria e progresso do 50/30/20 em tempo real.',
     ],
   },
   tws: {
@@ -287,7 +287,7 @@ const enText: Record<CaseId, CaseText> = {
     points: [
       'Transactions, recurring bills and installments with statuses that update themselves.',
       'Supabase Auth login and per-user data isolation with PostgreSQL Row Level Security.',
-      'Optional bank import through Pluggy. Imported transactions land in a review inbox and only count toward the balance once confirmed.',
+      'Category budgets and 50/30/20 progress dashboards in real time.',
     ],
   },
   tws: {

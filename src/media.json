@@ -1,3 +1,4 @@
 {
+  "strackz": { "frame": "wide", "themes": ["dark", "light"], "video": true },
   "graoraro": { "frame": "wide", "themes": ["default"], "video": true }
 }
