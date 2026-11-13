@@ -114,7 +114,8 @@ function Smaller({ file, i }: { file: CaseFile; i: number }) {
 
 export function Cases() {
   const { t } = useLang()
-  const [first, ...rest] = t.files
+  const first = t.files.find((f) => f.tier === 'featured')!
+  const rest = t.files.filter((f) => f !== first)
   return (
     <section id="casos" className="scroll-mt-16 bg-ink py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -140,7 +141,7 @@ export function Cases() {
             {t.archive.map((a) => (
               <li key={a.name}>
                 <a
-                  href={a.repo}
+                  href={a.href}
                   target="_blank"
                   rel="noreferrer"
                   className="group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"

@@ -2,17 +2,57 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 export type Lang = 'pt' | 'en'
 
-export type CaseFile = {
-  id: string
+const caseIds = ['strackz', 'sgymz', 'face', 'rick'] as const
+export type CaseId = (typeof caseIds)[number]
+
+type CaseBase = {
   name: string
+  tier: 'featured' | 'smaller'
   status: 'live' | 'personal' | 'local'
   url?: string
   repo?: string
   shot?: string
-  summary: string
-  points: string[]
   stack: string[]
 }
+type CaseText = { summary: string; points: string[] }
+export type CaseFile = { id: CaseId } & CaseBase & CaseText
+
+const caseBase: Record<CaseId, CaseBase> = {
+  strackz: {
+    name: 'StrackZ',
+    tier: 'featured',
+    status: 'live',
+    url: 'https://strackz.sinovaz.com',
+    shot: '/shots/strackz.jpg',
+    stack: ['Next.js', 'TypeScript', 'Supabase', 'PostgreSQL', 'Tailwind', 'Radix UI', 'Recharts'],
+  },
+  sgymz: {
+    name: 'SgymZ',
+    tier: 'smaller',
+    status: 'personal',
+    repo: 'https://github.com/PeSzpak/SgymZ',
+    stack: ['Next.js 16', 'Supabase', 'Tailwind 4', 'Zod', 'Bun'],
+  },
+  face: {
+    name: 'Face Recognition Pro',
+    tier: 'smaller',
+    status: 'local',
+    repo: 'https://github.com/PeSzpak/face-recognition-pro',
+    stack: ['Python', 'FastAPI', 'InsightFace', 'Banco vetorial', 'React', 'Docker'],
+  },
+  rick: {
+    name: 'Rick and Morty',
+    tier: 'smaller',
+    status: 'live',
+    url: 'https://rick-and-morty-api-alpha-ten.vercel.app',
+    repo: 'https://github.com/PeSzpak/RickAndMortyAPI',
+    shot: '/shots/rickmorty.jpg',
+    stack: ['React', 'CSS', 'Vercel'],
+  },
+}
+
+const buildFiles = (text: Record<CaseId, CaseText>, stacks: Partial<Record<CaseId, string[]>> = {}): CaseFile[] =>
+  caseIds.map((id) => ({ id, ...caseBase[id], ...(stacks[id] && { stack: stacks[id] }), ...text[id] }))
 
 export type Job = {
   when: string
@@ -25,13 +65,39 @@ export type Job = {
 
 export type Pouch = { name: string; tools: string[] }
 
-export type ArchiveEntry = { name: string; note: string; repo: string }
+export type ArchiveEntry = { name: string; note: string; href: string }
 
 const shared = {
   email: 'pedrohszpaka@gmail.com',
   github: 'https://github.com/PeSzpak',
   linkedin: 'https://linkedin.com/in/pedro-szpak04',
   cv: 'https://peszpak.github.io/PedroSzpak-SoftwareDeveloper.pdf',
+}
+
+const ptText: Record<CaseId, CaseText> = {
+  strackz: {
+    summary: 'Gerenciador financeiro pessoal com o método 50/30/20. Comecei para organizar o meu dinheiro e hoje roda em produção.',
+    points: [
+      'Transações, contas recorrentes e parcelamentos com status que se atualizam sozinhos.',
+      'Login com Supabase Auth e dados isolados por usuário com Row Level Security no PostgreSQL.',
+      'Painéis de orçamento por categoria e progresso do 50/30/20 em tempo real.',
+    ],
+  },
+  sgymz: {
+    summary: 'Gerenciador de treinos que fiz para mim e para minha namorada. Eu monto os treinos, ela registra como foi. Dois temas: Batman para mim, Hello Kitty para ela.',
+    points: [
+      'Logins separados para admin e usuário, com aprovação de cadastro.',
+      'RLS no Supabase para cada pessoa só ver o que é dela.',
+    ],
+  },
+  face: {
+    summary: 'Reconhecimento facial com IA, 100% local em Docker. Detecta rostos, gera embeddings e busca por similaridade num banco vetorial.',
+    points: ['API em FastAPI com InsightFace e documentação automática.', 'Sobe inteiro com um docker compose.'],
+  },
+  rick: {
+    summary: 'Catálogo de personagens da minha série favorita consumindo a API pública. Foi onde o React clicou para mim.',
+    points: [],
+  },
 }
 
 const pt = {
@@ -55,62 +121,16 @@ const pt = {
     stackLabel: 'Feito com',
     archiveTitle: 'Arquivo',
     archiveIntro: 'Estudos e projetos menores, guardados para consulta.',
+    text: ptText,
   },
-  files: [
-    {
-      id: 'strackz',
-      name: 'StrackZ',
-      status: 'live',
-      url: 'https://strackz.sinovaz.com',
-      shot: '/shots/strackz.jpg',
-      summary: 'Gerenciador financeiro pessoal com o método 50/30/20. Comecei para organizar o meu dinheiro e hoje roda em produção.',
-      points: [
-        'Transações, contas recorrentes e parcelamentos com status que se atualizam sozinhos.',
-        'Login com Supabase Auth e dados isolados por usuário com Row Level Security no PostgreSQL.',
-        'Painéis de orçamento por categoria e progresso do 50/30/20 em tempo real.',
-      ],
-      stack: ['Next.js', 'TypeScript', 'Supabase', 'PostgreSQL', 'Tailwind', 'Radix UI', 'Recharts'],
-    },
-    {
-      id: 'sgymz',
-      name: 'SgymZ',
-      status: 'personal',
-      repo: 'https://github.com/PeSzpak/SgymZ',
-      summary: 'Gerenciador de treinos que fiz para mim e para minha namorada. Eu monto os treinos, ela registra como foi. Dois temas: Batman para mim, Hello Kitty para ela.',
-      points: [
-        'Logins separados para admin e usuário, com aprovação de cadastro.',
-        'RLS no Supabase para cada pessoa só ver o que é dela.',
-      ],
-      stack: ['Next.js 16', 'Supabase', 'Tailwind 4', 'Zod', 'Bun'],
-    },
-    {
-      id: 'face',
-      name: 'Face Recognition Pro',
-      status: 'local',
-      repo: 'https://github.com/PeSzpak/face-recognition-pro',
-      summary: 'Reconhecimento facial com IA, 100% local em Docker. Detecta rostos, gera embeddings e busca por similaridade num banco vetorial.',
-      points: ['API em FastAPI com InsightFace e documentação automática.', 'Sobe inteiro com um docker compose.'],
-      stack: ['Python', 'FastAPI', 'InsightFace', 'Banco vetorial', 'React', 'Docker'],
-    },
-    {
-      id: 'rick',
-      name: 'Rick and Morty',
-      status: 'live',
-      url: 'https://rick-and-morty-api-alpha-ten.vercel.app',
-      repo: 'https://github.com/PeSzpak/RickAndMortyAPI',
-      shot: '/shots/rickmorty.jpg',
-      summary: 'Catálogo de personagens da minha série favorita consumindo a API pública. Foi onde o React clicou para mim.',
-      points: [],
-      stack: ['React', 'CSS', 'Vercel'],
-    },
-  ] as CaseFile[],
+  files: buildFiles(ptText),
   archive: [
-    { name: 'airflow-dags-study', note: 'DAGs do Apache Airflow com Docker Compose', repo: 'https://github.com/PeSzpak/airflow-dags-study' },
-    { name: 'NexusAPI', note: 'API REST em Express e MongoDB com arquitetura modular', repo: 'https://github.com/PeSzpak/NexusAPI' },
-    { name: 'nestjs-mongodb-auth-api', note: 'NestJS com autenticação JWT e validação', repo: 'https://github.com/PeSzpak/nestjs-mongodb-auth-api' },
-    { name: 'Java-Data-Structures', note: '11 algoritmos de ordenação comparados em 100 mil elementos', repo: 'https://github.com/PeSzpak/Java-Data-Structures' },
-    { name: 'timsort-dijkstra-entregas', note: 'TimSort feito à mão aplicado ao Dijkstra em rotas de entrega', repo: 'https://github.com/PeSzpak/timsort-dijkstra-entregas' },
-    { name: 'Forno-di-Pietra-Ristorante', note: 'Sistema desktop de restaurante em Java Swing e MySQL', repo: 'https://github.com/PeSzpak/Forno-di-Pietra-Ristorante' },
+    { name: 'airflow-dags-study', note: 'DAGs do Apache Airflow com Docker Compose', href: 'https://github.com/PeSzpak/airflow-dags-study' },
+    { name: 'NexusAPI', note: 'API REST em Express e MongoDB com arquitetura modular', href: 'https://github.com/PeSzpak/NexusAPI' },
+    { name: 'nestjs-mongodb-auth-api', note: 'NestJS com autenticação JWT e validação', href: 'https://github.com/PeSzpak/nestjs-mongodb-auth-api' },
+    { name: 'Java-Data-Structures', note: '11 algoritmos de ordenação comparados em 100 mil elementos', href: 'https://github.com/PeSzpak/Java-Data-Structures' },
+    { name: 'timsort-dijkstra-entregas', note: 'TimSort feito à mão aplicado ao Dijkstra em rotas de entrega', href: 'https://github.com/PeSzpak/timsort-dijkstra-entregas' },
+    { name: 'Forno-di-Pietra-Ristorante', note: 'Sistema desktop de restaurante em Java Swing e MySQL', href: 'https://github.com/PeSzpak/Forno-di-Pietra-Ristorante' },
   ] as ArchiveEntry[],
   path: {
     title: 'Trajetória',
@@ -191,6 +211,29 @@ const pt = {
 
 export type Dict = typeof pt
 
+const enText: Record<CaseId, CaseText> = {
+  strackz: {
+    summary: 'Personal finance manager built on the 50/30/20 method. I started it to sort out my own money; now it runs in production.',
+    points: [
+      'Transactions, recurring bills and installments with statuses that update themselves.',
+      'Supabase Auth login and per-user data isolation with PostgreSQL Row Level Security.',
+      'Category budgets and 50/30/20 progress dashboards in real time.',
+    ],
+  },
+  sgymz: {
+    summary: 'A workout manager I built for my girlfriend and me. I plan the workouts, she logs how they went. Two themes: Batman for me, Hello Kitty for her.',
+    points: ['Separate admin and user logins, with sign-up approval.', 'Supabase RLS so everyone sees only their own data.'],
+  },
+  face: {
+    summary: 'AI face recognition running fully local in Docker. Detects faces, generates embeddings and runs similarity search on a vector database.',
+    points: ['FastAPI service with InsightFace and auto-generated docs.', 'The whole stack starts with one docker compose.'],
+  },
+  rick: {
+    summary: 'Character catalog for my favorite show, built on the public API. This is where React clicked for me.',
+    points: [],
+  },
+}
+
 const en: Dict = {
   ...pt,
   nav: { cases: 'Cases', path: 'Path', belt: 'Arsenal', contact: 'Contact' },
@@ -212,33 +255,9 @@ const en: Dict = {
     stackLabel: 'Built with',
     archiveTitle: 'Archive',
     archiveIntro: 'Studies and smaller projects, kept on file.',
+    text: enText,
   },
-  files: [
-    {
-      ...pt.files[0],
-      summary: 'Personal finance manager built on the 50/30/20 method. I started it to sort out my own money; now it runs in production.',
-      points: [
-        'Transactions, recurring bills and installments with statuses that update themselves.',
-        'Supabase Auth login and per-user data isolation with PostgreSQL Row Level Security.',
-        'Category budgets and 50/30/20 progress dashboards in real time.',
-      ],
-    },
-    {
-      ...pt.files[1],
-      summary: 'A workout manager I built for my girlfriend and me. I plan the workouts, she logs how they went. Two themes: Batman for me, Hello Kitty for her.',
-      points: ['Separate admin and user logins, with sign-up approval.', 'Supabase RLS so everyone sees only their own data.'],
-    },
-    {
-      ...pt.files[2],
-      summary: 'AI face recognition running fully local in Docker. Detects faces, generates embeddings and runs similarity search on a vector database.',
-      points: ['FastAPI service with InsightFace and auto-generated docs.', 'The whole stack starts with one docker compose.'],
-      stack: ['Python', 'FastAPI', 'InsightFace', 'Vector DB', 'React', 'Docker'],
-    },
-    {
-      ...pt.files[3],
-      summary: 'Character catalog for my favorite show, built on the public API. This is where React clicked for me.',
-    },
-  ],
+  files: buildFiles(enText, { face: ['Python', 'FastAPI', 'InsightFace', 'Vector DB', 'React', 'Docker'] }),
   archive: [
     { ...pt.archive[0], note: 'Apache Airflow DAGs with Docker Compose' },
     { ...pt.archive[1], note: 'REST API in Express and MongoDB with a modular architecture' },
