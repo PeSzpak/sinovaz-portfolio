@@ -19,7 +19,6 @@ type CaseBase = {
   status: 'live' | 'personal' | 'local'
   url?: string
   repo?: string
-  shot?: string
   media?: Media
   stack: string[]
 }
@@ -32,7 +31,6 @@ const caseBase: Record<CaseId, CaseBase> = {
     tier: 'featured',
     status: 'live',
     url: 'https://strackz.sinovaz.com',
-    shot: '/shots/strackz.jpg',
     stack: ['Next.js', 'TypeScript', 'Supabase', 'PostgreSQL', 'Tailwind', 'Radix UI', 'Recharts'],
   },
   tws: {

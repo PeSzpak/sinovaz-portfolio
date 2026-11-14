@@ -24,15 +24,7 @@ function Caption({ file }: { file: CaseFile }) {
 }
 
 export function Evidence({ file }: { file: CaseFile }) {
-  if (file.media) return <Photo file={file} media={file.media} />
-  if (!file.shot) return null
-  return (
-    <div className={frame}>
-      <span aria-hidden className={tape} />
-      <img src={file.shot} alt={file.name} loading="lazy" className="evidence aspect-[16/10] w-full object-cover object-top" />
-      <Caption file={file} />
-    </div>
-  )
+  return file.media ? <Photo file={file} media={file.media} /> : null
 }
 
 function Photo({ file, media }: { file: CaseFile; media: Media }) {

@@ -1,7 +1,7 @@
 import { useLang, type CaseFile } from '../i18n'
 import { Evidence } from '../components/Evidence'
 
-const hasPhoto = (f: CaseFile) => Boolean(f.media || f.shot)
+const hasPhoto = (f: CaseFile) => Boolean(f.media)
 
 function Links({ file, dark = true }: { file: CaseFile; dark?: boolean }) {
   const { t } = useLang()
