@@ -33,8 +33,26 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
   const [still] = useState(() => reduce === true || saveData())
   const views: View[] = media.video ? [...media.themes, 'video'] : [...media.themes]
   const [view, setView] = useState<View>(media.video && !still ? 'video' : media.themes[0])
+  const [shown, setShown] = useState<View[]>([view])
+  const [near, setNear] = useState(false)
+  const box = useRef<HTMLDivElement>(null)
   const video = useRef<HTMLVideoElement>(null)
   const dir = `/media/${file.id}`
+
+  // native lazy loading starts ~1250px early and posters are never lazy, so mount layers only near the viewport
+  useEffect(() => {
+    const el = box.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: '300px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  const show = (v: View) => {
+    setView(v)
+    setShown((s) => (s.includes(v) ? s : [...s, v]))
+  }
+  const mounted = (v: View) => near && shown.includes(v)
 
   useEffect(() => {
     const v = video.current
@@ -52,7 +70,7 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
       io.disconnect()
       v.pause()
     }
-  }, [view, still])
+  }, [view, still, near])
 
   const layer = (on: boolean) =>
     `absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500 ${on ? 'opacity-100' : 'pointer-events-none opacity-0'}`
@@ -62,8 +80,8 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
     <div className={media.frame === 'tall' ? 'mx-auto w-full max-w-[17rem]' : ''}>
       <div className={frame}>
         <span aria-hidden className={tape} />
-        <div className={`evidence relative overflow-hidden ${media.frame === 'tall' ? 'aspect-[9/16]' : 'aspect-[16/10]'}`} data-view={view}>
-          {media.themes.map((th) => (
+        <div ref={box} className={`evidence relative overflow-hidden ${media.frame === 'tall' ? 'aspect-[9/16]' : 'aspect-[16/10]'}`} data-view={view}>
+          {media.themes.filter(mounted).map((th) => (
             <img
               key={th}
               src={`${dir}/${th}.webp`}
@@ -73,7 +91,7 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
               className={layer(view === th)}
             />
           ))}
-          {media.video && (
+          {media.video && mounted('video') && (
             <video
               ref={video}
               muted
@@ -100,7 +118,7 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
               <button
                 key={v}
                 type="button"
-                onClick={() => setView(v)}
+                onClick={() => show(v)}
                 aria-pressed={view === v}
                 className={`display px-4 py-1.5 text-base font-bold transition-colors ${
                   view === v ? 'bg-ink text-paper' : 'text-ink/70 hover:text-ink'

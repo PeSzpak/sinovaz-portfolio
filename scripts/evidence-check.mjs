@@ -20,8 +20,7 @@ async function open(opts) {
   const { ctx, page, seen } = await open({})
   await page.waitForTimeout(1500)
   assert.equal(seen.size, 0, `video requested before scroll: ${[...seen]}`)
-  await page.locator('video').first().scrollIntoViewIfNeeded()
-  await page.evaluate(() => document.querySelector('video').closest('article').scrollIntoView({ block: 'center' }))
+  await page.evaluate(() => document.querySelector('#casos article').scrollIntoView({ block: 'center' }))
   await page.waitForTimeout(2500)
   assert.equal(seen.size, 1, `expected one video file after scrolling to the card, got ${seen.size}`)
   console.log('ok   no video bytes before scroll, one video file after:', [...seen][0].split('/media/')[1])
@@ -34,10 +33,10 @@ async function open(opts) {
     await page.evaluate((v) => window.scrollTo(0, v), y)
     await page.waitForTimeout(80)
   }
-  await page.evaluate(() => document.querySelector('video').closest('article').scrollIntoView({ block: 'center' }))
+  await page.evaluate(() => document.querySelector('#casos article').scrollIntoView({ block: 'center' }))
   await page.waitForTimeout(2000)
   assert.equal(seen.size, 0, `reduced motion fetched video: ${[...seen]}`)
-  assert.equal(await page.locator('video').first().evaluate((v) => v.paused), true)
+  assert.equal(await page.locator('video').evaluateAll((vs) => vs.every((v) => v.paused)), true)
   console.log('ok   reduced motion: zero video requests after a full scroll, video paused')
   await ctx.close()
 }
