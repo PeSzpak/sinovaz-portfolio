@@ -1,5 +1,33 @@
 {
-  "strackz": { "frame": "wide", "themes": ["dark", "light"], "video": true },
-  "tws": { "frame": "tall", "themes": ["light", "dark"], "video": true },
-  "graoraro": { "frame": "wide", "themes": ["default"], "video": true }
+  "strackz": {
+    "frame": "wide",
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "video": true
+  },
+  "tws": {
+    "frame": "tall",
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "video": true
+  },
+  "sgymz": {
+    "frame": "tall",
+    "themes": [
+      "kitty",
+      "batman"
+    ],
+    "video": true
+  },
+  "graoraro": {
+    "frame": "wide",
+    "themes": [
+      "default"
+    ],
+    "video": true
+  }
 }
