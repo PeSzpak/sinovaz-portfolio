@@ -65,7 +65,8 @@ if (both || flags.includes('--stills')) {
 
 if (both || flags.includes('--video')) {
   const theme = recipe.themes[0]
-  const size = { width: viewport.width * scale, height: viewport.height * scale }
+  // Playwright does not upscale the screencast: a larger size only pads the frame, so record at CSS pixels.
+  const size = viewport
   // Login happens in a throwaway context so the recording starts on the first story beat.
   let storageState
   if (recipe.prepare) {
