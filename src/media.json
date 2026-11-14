@@ -23,6 +23,13 @@
     ],
     "video": true
   },
+  "face": {
+    "frame": "wide",
+    "themes": [
+      "default"
+    ],
+    "video": true
+  },
   "graoraro": {
     "frame": "wide",
     "themes": [
