@@ -65,7 +65,7 @@ function Featured({ file, flip }: { file: CaseFile; flip: boolean }) {
   )
 }
 
-const tilts = ['md:rotate-[0.8deg]', 'md:-rotate-[0.6deg] md:mt-10', 'md:rotate-[0.4deg] md:mt-4']
+const tilts = ['md:rotate-[0.8deg]', 'md:-rotate-[0.6deg] lg:mt-10', 'md:rotate-[0.4deg] lg:mt-4']
 
 function Smaller({ file, i }: { file: CaseFile; i: number }) {
   const { t } = useLang()
@@ -74,14 +74,12 @@ function Smaller({ file, i }: { file: CaseFile; i: number }) {
       className={`paper relative flex flex-col rounded-[3px] p-6 shadow-[0_24px_40px_-18px_rgb(0_0_0/0.9)] ${tilts[i % tilts.length]}`}
     >
       {hasPhoto(file) && (
-        <div className="mb-6">
+        <div className="mb-10">
           <Evidence file={file} />
         </div>
       )}
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="display text-4xl font-black">{file.name}</h3>
-        <Stamp status={file.status} className="-rotate-[6deg] text-base" />
-      </div>
+      <h3 className="display text-4xl font-black">{file.name}</h3>
+      <Stamp status={file.status} className="mt-2 w-fit -rotate-[4deg] text-base" />
       <p className="mt-3 text-base leading-relaxed">{file.summary}</p>
       {file.points.length > 0 && (
         <ul className="mt-4 space-y-1.5 text-[0.95rem]">
@@ -120,7 +118,7 @@ export function Cases() {
           ))}
         </div>
 
-        <div className="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
+        <div className="mt-14 grid gap-10 lg:grid-cols-3 lg:gap-8">
           {rest.map((f, i) => (
             <Smaller key={f.id} file={f} i={i} />
           ))}
