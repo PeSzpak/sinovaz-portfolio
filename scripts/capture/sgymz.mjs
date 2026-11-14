@@ -11,7 +11,7 @@ const dbContainer = process.env.SGYMZ_DB_CONTAINER ?? 'supabase_db_sgymz-local'
 const password = 'demo-pass-123'
 const storageTheme = { kitty: 'hellokitty', batman: 'batman' }
 
-if (!/^https?:\/\/(127\.0\.0\.1|localhost)/.test(api)) throw new Error('SGYMZ_API must be a local Supabase')
+if (!/^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(api)) throw new Error('SGYMZ_API must be a local Supabase')
 
 const post = (path, body) =>
   fetch(`${api}${path}`, { method: 'POST', headers: { apikey: service, authorization: `Bearer ${service}`, 'content-type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json())

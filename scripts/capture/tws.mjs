@@ -1,5 +1,5 @@
 // Runs against a LOCAL Supabase (fictional members Ana and Leo) and a TWS Score dev server pointed at it.
-// Never point this at the real project. Start both first, see the commands in scripts/capture/README or the unit notes:
+// Never point this at the real project. Start both first, see the commands below:
 //   supabase local stack on :54321, then in the app repo:
 //   VITE_SUPABASE_URL=http://127.0.0.1:54321 VITE_SUPABASE_PUBLISHABLE_KEY=$ANON VITE_GOOGLE_MAPS_KEY= npx vite --port 5174
 import { execFileSync } from 'node:child_process'
@@ -13,7 +13,7 @@ const dbContainer = process.env.TWS_DB_CONTAINER ?? 'supabase_db_tws-local'
 const password = 'demo-pass-123'
 const storageKey = `sb-${new URL(api).hostname.split('.')[0]}-auth-token`
 
-if (!/^https?:\/\/(127\.0\.0\.1|localhost)/.test(api)) throw new Error('TWS_API must be a local Supabase')
+if (!/^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(api)) throw new Error('TWS_API must be a local Supabase')
 
 const json = (url, key, body, method = 'POST') =>
   fetch(url, { method, headers: { apikey: key, authorization: `Bearer ${key}`, 'content-type': 'application/json' }, body: body && JSON.stringify(body) }).then((r) => r.json())

@@ -8,7 +8,7 @@ import { budget } from './media-budget.mjs'
 if (existsSync('.env.capture')) {
   for (const l of readFileSync('.env.capture', 'utf8').split('\n')) {
     const m = l.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/)
-    if (m && !(m[1] in process.env)) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '')
+    if (m && !(m[1] in process.env)) process.env[m[1]] = m[2].trim().replace(/^["']|["']$/g, '')
   }
 }
 

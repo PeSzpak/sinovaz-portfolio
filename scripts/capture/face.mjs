@@ -2,6 +2,7 @@
 // Faces are StyleGAN images from thispersondoesnotexist.com, i.e. nobody real. Set FACE_DIR to a directory holding
 // ana-1..4.jpg, leo-1..4.jpg, clara-1..4.jpg and FACE_CAM to an .mjpeg of the Ana face for the fake camera.
 import { readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 
 const base = process.env.FACE_URL ?? 'http://localhost:8080'
 const dir = process.env.FACE_DIR
@@ -29,7 +30,17 @@ const form = (field, files, extra = {}) => {
 }
 
 // Wipes people, enrolls the three fictional ones, grants Ana Face ID and logs a few recognitions for the dashboard and history.
+function assertThrowawayStack() {
+  const port = new URL(base).port || '80'
+  const owners = execFileSync('docker', ['ps', '--filter', `publish=${port}`, '--format', '{{.Label "com.docker.compose.project"}}'], { encoding: 'utf8' })
+    .split('\n')
+    .filter(Boolean)
+  if (owners.length === 0 || owners.some((o) => o !== 'frp-demo'))
+    throw new Error(`port ${port} is served by [${owners}], not the frp-demo stack; refusing to wipe enrolled people`)
+}
+
 async function seed() {
+  assertThrowawayStack()
   const session = await call('/auth/login', null, json({ username: 'admin', password: 'admin123' }))
   const token = session.access_token
   for (const p of (await call('/persons?size=100', token)).items) await call(`/persons/${p.id}`, token, { method: 'DELETE' })
