@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
 import { useLang, type CaseFile, type Media, type ThemeId } from '../i18n'
 
-type View = ThemeId | 'video'
+type View = ThemeId | 'video' | 'trailer'
 
 const saveData = () =>
   (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true
@@ -31,12 +31,13 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
   const { t } = useLang()
   const reduce = useReducedMotion()
   const [still] = useState(() => reduce === true || saveData())
-  const views: View[] = media.video ? [...media.themes, 'video'] : [...media.themes]
-  const [view, setView] = useState<View>(media.video && !still ? 'video' : media.themes[0])
+  const views: View[] = [...(media.trailer ? (['trailer'] as const) : []), ...(media.video ? (['video'] as const) : []), ...media.themes]
+  const [view, setView] = useState<View>(still ? media.themes[0] : media.trailer ? 'trailer' : media.video ? 'video' : media.themes[0])
   const [shown, setShown] = useState<View[]>([view])
   const [near, setNear] = useState(false)
   const box = useRef<HTMLDivElement>(null)
   const video = useRef<HTMLVideoElement>(null)
+  const trailer = useRef<HTMLVideoElement>(null)
   const dir = `/media/${file.id}`
 
   // native lazy loading starts ~1250px early and posters are never lazy, so mount layers only near the viewport
@@ -55,26 +56,24 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
   const mounted = (v: View) => near && shown.includes(v)
 
   useEffect(() => {
-    const v = video.current
-    if (view !== 'video' || !v) return
-    if (still) return () => v.pause()
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) v.play().catch(() => {})
-        else v.pause()
-      },
-      { threshold: 0.6 },
-    )
-    io.observe(v)
+    const v = view === 'video' ? video.current : view === 'trailer' ? trailer.current : null
+    if (!v || still) return
+    // Safari in Low Power Mode rejects autoplay until the page gets a user gesture, so retry on the first one
+    const events = ['pointerdown', 'keydown', 'touchstart'] as const
+    const retry = () => {
+      events.forEach((e) => document.removeEventListener(e, retry))
+      v.play().catch(() => {})
+    }
+    v.play().catch(() => events.forEach((e) => document.addEventListener(e, retry)))
     return () => {
-      io.disconnect()
+      events.forEach((e) => document.removeEventListener(e, retry))
       v.pause()
     }
   }, [view, still, near])
 
   const layer = (on: boolean) =>
     `absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500 ${on ? 'opacity-100' : 'pointer-events-none opacity-0'}`
-  const label = (v: View) => (v === 'video' ? t.cases.demo : t.cases.views[v])
+  const label = (v: View) => (v === 'video' ? t.cases.demo : v === 'trailer' ? t.cases.trailer : t.cases.views[v])
 
   return (
     <div className={media.frame === 'tall' ? 'mx-auto w-full max-w-[17rem]' : ''}>
@@ -96,6 +95,7 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
               ref={video}
               muted
               loop
+              autoPlay={!still && view === 'video'}
               playsInline
               preload="none"
               controls={still}
@@ -106,6 +106,24 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
             >
               <source src={`${dir}/demo.webm`} type="video/webm" />
               <source src={`${dir}/demo.mp4`} type="video/mp4" />
+            </video>
+          )}
+          {media.trailer && mounted('trailer') && (
+            <video
+              ref={trailer}
+              muted
+              loop
+              autoPlay={!still}
+              controls
+              playsInline
+              preload="none"
+              poster={`${dir}/trailer-poster.webp`}
+              aria-label={`${file.name}, ${t.cases.trailer}`}
+              inert={view !== 'trailer'}
+              className={layer(view === 'trailer')}
+            >
+              <source src={`${dir}/trailer.webm`} type="video/webm" />
+              <source src={`${dir}/trailer.mp4`} type="video/mp4" />
             </video>
           )}
         </div>
@@ -120,7 +138,7 @@ function Photo({ file, media }: { file: CaseFile; media: Media }) {
                 type="button"
                 onClick={() => show(v)}
                 aria-pressed={view === v}
-                className={`display px-4 py-1.5 text-base font-bold transition-colors ${
+                className={`display whitespace-nowrap px-2.5 py-1.5 text-base font-bold transition-colors ${
                   view === v ? 'bg-ink text-paper' : 'text-ink/70 hover:text-ink'
                 }`}
               >

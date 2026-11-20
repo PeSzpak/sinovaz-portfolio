@@ -8,6 +8,7 @@ export type Media = {
   frame: 'wide' | 'tall'
   themes: [ThemeId] | [ThemeId, ThemeId]
   video?: true
+  trailer?: true
 }
 
 const caseIds = ['strackz', 'tws', 'sgymz', 'face', 'graoraro'] as const
@@ -152,6 +153,7 @@ const pt = {
     status: { live: 'No ar', personal: 'Em uso', local: 'Roda local' },
     open: 'Abrir o site',
     demo: 'Demo',
+    trailer: 'Trailer',
     views: { default: 'Tela', light: 'Claro', dark: 'Escuro', batman: 'Batman', kitty: 'Hello Kitty' } as Record<ThemeId, string>,
     code: 'Ver código',
     stackLabel: 'Feito com',
@@ -340,6 +342,7 @@ const en: Dict = {
     status: { live: 'Live', personal: 'In use', local: 'Runs locally' },
     open: 'Open the site',
     demo: 'Demo',
+    trailer: 'Trailer',
     views: { default: 'Screen', light: 'Light', dark: 'Dark', batman: 'Batman', kitty: 'Hello Kitty' } as Record<ThemeId, string>,
     code: 'View code',
     stackLabel: 'Built with',

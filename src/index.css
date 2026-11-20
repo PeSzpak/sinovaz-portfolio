@@ -76,7 +76,8 @@ body {
 }
 .evidence-wrap:hover .evidence,
 .evidence-wrap:focus-within .evidence,
-.evidence[data-view='video'] {
+.evidence[data-view='video'],
+.evidence[data-view='trailer'] {
   filter: none;
 }
 @media (hover: none) {

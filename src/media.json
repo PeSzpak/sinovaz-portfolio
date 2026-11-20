@@ -5,7 +5,8 @@
       "dark",
       "light"
     ],
-    "video": true
+    "video": true,
+    "trailer": true
   },
   "tws": {
     "frame": "tall",
@@ -13,7 +14,8 @@
       "light",
       "dark"
     ],
-    "video": true
+    "video": true,
+    "trailer": true
   },
   "sgymz": {
     "frame": "tall",
@@ -21,20 +23,23 @@
       "kitty",
       "batman"
     ],
-    "video": true
+    "video": true,
+    "trailer": true
   },
   "face": {
     "frame": "wide",
     "themes": [
       "default"
     ],
-    "video": true
+    "video": true,
+    "trailer": true
   },
   "graoraro": {
     "frame": "wide",
     "themes": [
       "default"
     ],
-    "video": true
+    "video": true,
+    "trailer": true
   }
 }
